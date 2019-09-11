@@ -1,5 +1,5 @@
 from options import N
-from stats import words_by_usefulness, build_prefix_cache
+from stats import words_by_usefulness, build_prefix_cache, build_letter_freq
 
 
 class State(object):
@@ -12,6 +12,7 @@ class State(object):
         self.step = 0
 
         self.prefix_cache = build_prefix_cache(words)
+        self.letter_freq = build_letter_freq(words)
 
     def __str__(self):
         mat = [['.'] * N for i in xrange(N)]
@@ -48,28 +49,28 @@ class State(object):
 
         good_list = []
         for word in possible:
-            if word in self.used:
-                continue
-
             good = True
-            usage = 0
+            usage = 1
             for i in R:
                 col_pref = col_pref_cache[i] + word[i]
                 if col_pref not in self.prefix_cache:
                     good = False
                     break
-                usage += len(self.prefix_cache[col_pref]) * 256 / (i + 1)
+                #usage += len(self.prefix_cache[col_pref]) * 256 / (i + 1)
+                usage /= self.letter_freq[word[i]]
             if good:
                 good_list.append((usage, word))
 
-        good_list.sort(reverse=True)
+        good_list.sort(reverse=False)
 
         for usage, word in good_list:
+            if word in self.used:
+                continue
 
             rows.append(word)
             self.used.add(word)
             self.step += 1
-            if (self.step & 4095) == 0:
+            if (self.step & 0xFFFF) == 0:
                 print self
             if self._recur(cols, rows):
                 return True

@@ -41,3 +41,11 @@ def build_prefix_cache(words):
             cache.setdefault(prefix, []).append(word)
 
     return cache
+
+def build_letter_freq(words):
+    counts = { c: 0.0 for c in LETTERS }
+    for word in words:
+        for c in word:
+            counts[c] += 1
+
+    return counts
