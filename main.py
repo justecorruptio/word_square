@@ -1,6 +1,6 @@
 import re
 
-from options import N
+from options import N, CONSONANTS, VOWELS
 from logic import State
 
 
@@ -13,7 +13,17 @@ def load_words():
         if len(word) != N:
             continue
 
-        if re.search(r'[QZXJKYFWV]', word):
+        #f re.search(r'[QZXJKYFWV]', word):
+        if re.search(r'[QZXJ]', word):
+            continue
+
+        if not re.match(r"""
+            ^{C}{V}{C} |
+            ^{V}{C}{V}
+        """.format(
+            C='[' + CONSONANTS + ']',
+            V='[' + VOWELS + ']',
+        ), word, re.X):
             continue
 
         words.append(word)
