@@ -1,3 +1,4 @@
+import time
 from options import N
 from stats import words_by_usefulness, build_prefix_cache, build_letter_freq
 
@@ -11,8 +12,9 @@ class State(object):
 
         self.step = 0
 
-        self.prefix_cache = build_prefix_cache(words)
-        self.letter_freq = build_letter_freq(words)
+        self.sorted_words = words_by_usefulness(words)
+        self.prefix_cache = build_prefix_cache(self.sorted_words)
+        self.letter_freq = build_letter_freq(self.sorted_words)
 
         self.good_list_cache = {}
 
@@ -55,18 +57,14 @@ class State(object):
         good_list = []
         for word in possible:
             good = True
-            usage = 1
             for i in R:
                 col_pref = col_pref_cache[i] + word[i]
                 if col_pref not in self.prefix_cache:
                     good = False
                     break
-                #usage += len(self.prefix_cache[col_pref]) * 256 / (i + 1)
-                usage /= self.letter_freq[word[i]]
             if good:
-                good_list.append((usage, word))
+                good_list.append(word)
 
-        good_list.sort(reverse=False)
         if cacheable:
             self.good_list_cache[cache_key] = good_list
 
@@ -80,7 +78,7 @@ class State(object):
 
         good_list = self._build_good_list(rows, cols)
 
-        for usage, word in good_list:
+        for word in good_list:
             if word in self.used:
                 continue
 
@@ -88,6 +86,7 @@ class State(object):
             self.used.add(word)
             self.step += 1
             if (self.step & 0xFFFF) == 0:
+                print time.time() - self.start_time
                 print self
             if self._recur(cols, rows):
                 return True
@@ -96,4 +95,5 @@ class State(object):
         return False
 
     def fill(self):
+        self.start_time = time.time()
         return self._recur(self.rows, self.cols)

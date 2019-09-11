@@ -17,17 +17,16 @@ def count_letter_pos(words):
 def words_by_usefulness(words):
     """Copies and sorts words by how many possible words can cross it."""
 
-    counts = count_letter_pos(words)
+    counts = build_letter_freq(words)
 
     trans = []
 
     for word in words:
-        usefulness = 0
+        usefulness = 1.0
         for i, c in enumerate(word):
-            # bug: double counts, should be ok
-            usefulness += counts[i][c]
+            usefulness /= counts[c]
 
-        trans.append((-usefulness, word))
+        trans.append((usefulness, word))
 
     return [w for _, w in sorted(trans)]
 
