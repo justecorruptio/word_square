@@ -40,7 +40,7 @@ class State(object):
         depth = len(rows)
         prefix = ''.join(col[depth] for col in cols)
 
-        cacheable = depth < 3
+        cacheable = depth < 4
 
         if cacheable:
             cache_key = ':'.join(rows) + '|' + prefix
@@ -56,13 +56,11 @@ class State(object):
 
         good_list = []
         for word in possible:
-            good = True
             for i in R:
                 col_pref = col_pref_cache[i] + word[i]
                 if col_pref not in self.prefix_cache:
-                    good = False
                     break
-            if good:
+            else:
                 good_list.append(word)
 
         if cacheable:
@@ -92,6 +90,8 @@ class State(object):
                 return True
             rows.pop()
             self.used.remove(word)
+            if not self.used:
+                self.good_list_cache = {}
         return False
 
     def fill(self):

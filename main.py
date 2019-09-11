@@ -1,3 +1,5 @@
+import re
+
 from options import N
 from logic import State
 
@@ -9,6 +11,9 @@ def load_words():
     for line in fh:
         word = line.strip().upper()
         if len(word) != N:
+            continue
+
+        if re.search(r'[QZXJKYFWV]', word):
             continue
 
         words.append(word)
