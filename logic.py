@@ -11,6 +11,7 @@ class State(object):
         self.used = set()
 
         self.step = 0
+        self.percent = 0
 
         self.sorted_words = words_by_usefulness(words)
         self.prefix_cache = build_prefix_cache(self.sorted_words)
@@ -49,14 +50,14 @@ class State(object):
 
         possible = self.prefix_cache[prefix]
 
+        R = xrange(len(prefix), N)
         col_pref_cache = [None] * N
-        R = range(len(prefix), N)
-        for i in R:
-            col_pref_cache[i] = ''.join(row[i] for row in rows)
 
         good_list = []
         for word in possible:
             for i in R:
+                if col_pref_cache[i] is None:
+                    col_pref_cache[i] = ''.join(row[i] for row in rows)
                 col_pref = col_pref_cache[i] + word[i]
                 if col_pref not in self.prefix_cache:
                     break
@@ -69,22 +70,24 @@ class State(object):
         return good_list
 
     def _recur(self, rows, cols):
-        #if self.step > 100000:
-        #    return True
         if len(rows) == len(cols) == N:
             return True
 
         good_list = self._build_good_list(rows, cols)
 
-        for word in good_list:
+        for i, word in enumerate(good_list):
             if word in self.used:
                 continue
 
             rows.append(word)
             self.used.add(word)
             self.step += 1
+            if not cols:
+                self.percent = 1. * i / len(good_list)
             if (self.step & 0xFFFF) == 0:
-                print time.time() - self.start_time
+                print '\033[2J\033[H'
+                print "ELAPSED: %.0fs" % (time.time() - self.start_time,)
+                print "PERCENT: %0.2f%%" % (self.percent * 100.0,)
                 print self
             if self._recur(cols, rows):
                 return True
