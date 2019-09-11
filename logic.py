@@ -14,6 +14,8 @@ class State(object):
         self.prefix_cache = build_prefix_cache(words)
         self.letter_freq = build_letter_freq(words)
 
+        self.good_list_cache = {}
+
     def __str__(self):
         mat = [['.'] * N for i in xrange(N)]
         for i, row in enumerate(self.rows):
@@ -32,14 +34,17 @@ class State(object):
 
         return ret
 
-    def _recur(self, rows, cols):
-        #if self.step > 100000:
-        #    return True
-        if len(rows) == len(cols) == N:
-            return True
-
+    def _build_good_list(self, rows, cols):
         depth = len(rows)
         prefix = ''.join(col[depth] for col in cols)
+
+        cacheable = depth < 3
+
+        if cacheable:
+            cache_key = ':'.join(rows) + '|' + prefix
+            if cache_key in self.good_list_cache:
+                return self.good_list_cache[cache_key]
+
         possible = self.prefix_cache[prefix]
 
         col_pref_cache = [None] * N
@@ -62,6 +67,18 @@ class State(object):
                 good_list.append((usage, word))
 
         good_list.sort(reverse=False)
+        if cacheable:
+            self.good_list_cache[cache_key] = good_list
+
+        return good_list
+
+    def _recur(self, rows, cols):
+        #if self.step > 100000:
+        #    return True
+        if len(rows) == len(cols) == N:
+            return True
+
+        good_list = self._build_good_list(rows, cols)
 
         for usage, word in good_list:
             if word in self.used:
