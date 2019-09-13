@@ -13,6 +13,7 @@ def load_words():
         if len(word) != N:
             continue
 
+        '''
         #f re.search(r'[QZXJKYFWV]', word):
         if re.search(r'[QZXJ]', word):
             continue
@@ -25,6 +26,7 @@ def load_words():
             V='[' + VOWELS + ']',
         ), word, re.X):
             continue
+        '''
 
         words.append(word)
 

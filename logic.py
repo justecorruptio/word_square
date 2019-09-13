@@ -41,7 +41,7 @@ class State(object):
         depth = len(rows)
         prefix = ''.join(col[depth] for col in cols)
 
-        cacheable = depth < 4
+        cacheable = depth < 5
 
         if cacheable:
             cache_key = ':'.join(rows) + '|' + prefix
@@ -58,8 +58,7 @@ class State(object):
             for i in R:
                 if col_pref_cache[i] is None:
                     col_pref_cache[i] = ''.join(row[i] for row in rows)
-                col_pref = col_pref_cache[i] + word[i]
-                if col_pref not in self.prefix_cache:
+                if col_pref_cache[i] + word[i] not in self.prefix_cache:
                     break
             else:
                 good_list.append(word)
@@ -84,8 +83,7 @@ class State(object):
             self.step += 1
             if not cols:
                 self.percent = 1. * i / len(good_list)
-            if (self.step & 0xFFFF) == 0:
-                print '\033[2J\033[H'
+            if (self.step & 0x1FFFF) == 0:
                 print "ELAPSED: %.0fs" % (time.time() - self.start_time,)
                 print "PERCENT: %0.2f%%" % (self.percent * 100.0,)
                 print self
