@@ -1,6 +1,10 @@
 import re
+import os
+import signal
+import sys
+import time
 
-from options import N, CONSONANTS, VOWELS
+from options import N, CONSONANTS, VOWELS, PARALLEL
 from logic import State
 
 
@@ -34,11 +38,23 @@ def load_words():
 
     return words
 
-
 ALL_WORDS = load_words()
+children = []
 
-state = State(ALL_WORDS)
+parent_pid = os.getpid()
 
-found = state.fill()
-print found
-print state
+os.setpgrp()
+
+for i in xrange(PARALLEL):
+    pid = os.fork()
+    if pid:
+        children.append(pid)
+    else:
+        state = State(ALL_WORDS, i)
+        found = state.fill()
+        print found
+        print state
+        os.killpg(parent_pid, signal.SIGTERM)
+
+while True:
+    time.sleep(1)

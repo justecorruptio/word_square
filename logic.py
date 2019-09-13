@@ -1,17 +1,16 @@
 import time
-from options import N
+from options import N, PARALLEL
 from stats import words_by_usefulness, build_prefix_cache, build_letter_freq
 
 
 class State(object):
 
-    def __init__(self, words):
+    def __init__(self, words, worker_num=0):
         self.rows = []
         self.cols = []
         self.used = set()
 
-        self.step = 0
-        self.percent = 0
+        self.worker_num = worker_num
 
         self.sorted_words = words_by_usefulness(words)
         self.prefix_cache = build_prefix_cache(self.sorted_words)
@@ -78,15 +77,18 @@ class State(object):
             if word in self.used:
                 continue
 
+            if not cols:
+                if i % PARALLEL != self.worker_num:
+                    continue
+                print "%s | %02d | %4.0fs %5.2f%%" % (
+                    word,
+                    self.worker_num,
+                    time.time() - self.start_time,
+                    100.0 * i / len(good_list),
+                )
+
             rows.append(word)
             self.used.add(word)
-            self.step += 1
-            if not cols:
-                self.percent = 1. * i / len(good_list)
-            if (self.step & 0x1FFFF) == 0:
-                print "ELAPSED: %.0fs" % (time.time() - self.start_time,)
-                print "PERCENT: %0.2f%%" % (self.percent * 100.0,)
-                print self
             if self._recur(cols, rows):
                 return True
             rows.pop()
