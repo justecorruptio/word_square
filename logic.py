@@ -5,12 +5,13 @@ from stats import words_by_usefulness, build_prefix_cache, build_letter_freq
 
 class State(object):
 
-    def __init__(self, words, worker_num=0):
+    def __init__(self, words, worker_num=0, print_lock=None):
         self.rows = []
         self.cols = []
         self.used = set()
 
         self.worker_num = worker_num
+        self.print_lock = print_lock
 
         self.sorted_words = words_by_usefulness(words)
         self.prefix_cache = build_prefix_cache(self.sorted_words)
@@ -80,12 +81,13 @@ class State(object):
             if not cols:
                 if i % PARALLEL != self.worker_num:
                     continue
-                print "%s | %02d | %4.0fs %5.2f%%" % (
-                    word,
-                    self.worker_num,
-                    time.time() - self.start_time,
-                    100.0 * i / len(good_list),
-                )
+                with self.print_lock:
+                    print "%s | %02d | %4.0fs %5.2f%%" % (
+                        word,
+                        self.worker_num,
+                        time.time() - self.start_time,
+                        100.0 * i / len(good_list),
+                    )
 
             rows.append(word)
             self.used.add(word)
