@@ -12,8 +12,11 @@ from logic import State
 
 def load_words():
     #fh = open('twl2018.txt', 'r')
+    fh = open('nwl2020.txt', 'r')
     #fh = open('sowpods.txt', 'r')
-    fh = open('scowl69.txt', 'r')
+    #fh = open('scowl69.txt', 'r')
+    #fh = open('gngram69.txt', 'r')
+    #fh = open('test.txt', 'r')
 
     words = []
     for line in fh:
@@ -22,19 +25,22 @@ def load_words():
             continue
 
         '''
-        #f re.search(r'[QZXJKYFWV]', word):
-        if re.search(r'[QZXJ]', word):
+        if re.search(r'[QZXJKYFWV]', word):
+        #if re.search(r'[QZXJ]', word):
             continue
+        '''
 
         '''
         if not re.match(r"""
-            ^{C}{V}{C}{V}{C} |
-            ^{V}{C}{V}{C}{V}
+            ^{C}{V}{C}{V}{C}{V}{C}{V} |
+            ^{V}{C}{V}{C}{V}{C}{V}{C}
         """.format(
             C='[' + CONSONANTS + ']',
             V='[' + VOWELS + ']',
         ), word, re.X):
             continue
+        '''
+
 
         words.append(word)
 
